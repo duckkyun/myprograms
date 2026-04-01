@@ -1,0 +1,17 @@
+{
+  "name": "codex-transcript-translator",
+  "version": "0.1.0",
+  "description": "Local transcript translator powered by Codex CLI and the Codex SDK.",
+  "type": "module",
+  "bin": {
+    "codex-transcript-translate": "./src/cli.js"
+  },
+  "scripts": {
+    "translate": "node ./src/cli.js",
+    "check": "node ./src/cli.js --help",
+    "test": "node --test --test-isolation=none"
+  },
+  "dependencies": {
+    "@openai/codex-sdk": "^0.118.0"
+  }
+}
