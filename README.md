@@ -44,10 +44,18 @@ Optional flags:
 - `--output "C:\path\custom_output.txt"`
 - `--model gpt-5.4`
 - `--reasoning low`
-- `--chunk-size 25`
-- `--max-chars 6000`
+- `--chunk-size 100`
+- `--max-chars 15000`
 - `--overwrite`
 - `--fresh`
+
+Recommended for long lecture transcripts on a ChatGPT/Codex plan:
+
+```powershell
+npm run translate -- "C:\Users\USER\Downloads\lecture1.txt" --reasoning low --chunk-size 100 --max-chars 15000
+```
+
+For especially short subtitle-style lines, `--chunk-size` matters more than `--max-chars`. The original `30 / 7000` split can create too many Codex turns and burn through your weekly limit faster than necessary.
 
 ## Output
 
@@ -73,4 +81,3 @@ The output will look like:
 - The translator keeps timestamps in the final file, but asks Codex to translate only the spoken text.
 - Non-timestamp lines such as chapter headings are also preserved and translated.
 - A progress file is written as `*.progress.json` while translation is running. If the process stops midway, rerun the same command to resume.
-

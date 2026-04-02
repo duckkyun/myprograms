@@ -30,9 +30,9 @@ Usage:
 Options:
   --output <path>        Write the final txt to a custom path.
   --model <name>         Ask Codex to use a specific model.
-  --reasoning <level>    minimal | low | medium | high | xhigh (default: medium)
-  --chunk-size <number>  Max transcript lines per chunk (default: 30)
-  --max-chars <number>   Max source characters per chunk (default: 7000)
+  --reasoning <level>    minimal | low | medium | high | xhigh (default: low)
+  --chunk-size <number>  Max transcript lines per chunk (default: 100)
+  --max-chars <number>   Max source characters per chunk (default: 15000)
   --overwrite            Replace an existing output file.
   --fresh                Ignore and replace any saved progress file.
   --help                 Show this help message.
@@ -58,9 +58,9 @@ function parseArgs(argv) {
     inputPath: null,
     outputPath: null,
     model: undefined,
-    reasoning: "medium",
-    chunkSize: 30,
-    maxChars: 7000,
+    reasoning: "low",
+    chunkSize: 100,
+    maxChars: 15000,
     overwrite: false,
     fresh: false,
     help: false,
@@ -263,4 +263,3 @@ main().catch((error) => {
   printSetupHint(error);
   process.exitCode = 1;
 });
-
