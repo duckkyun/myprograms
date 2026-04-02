@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 
 const TIMESTAMP_LINE_RE =
-  /^(?<timestamp>(?:\d+:)?\d+:\d{2})(?:\d+\uC2DC\uAC04)?(?:\s*\d+\uBD84)?\s*\d+\uCD08(?<text>.*)$/u;
+  /^(?<timestamp>(?:\d+:)?\d+:\d{2})(?:\d+\uC2DC\uAC04)?(?:\s*\d+\uBD84)?(?:\s*\d+\uCD08)?(?<text>.*)$/u;
 const HEADING_LINE_RE = /^(?:chapter|\uCC55\uD130)\s*\d+\s*:/iu;
 
 function isHeadingLine(line) {
