@@ -4,6 +4,9 @@ import assert from "node:assert/strict";
 import {
   buildChunks,
   createFingerprint,
+  createReviewFingerprint,
+  defaultPolishOutputPath,
+  parseBilingualText,
   parseTranscriptText,
   renderBilingualOutput,
 } from "../src/lib/transcript.js";
@@ -66,6 +69,24 @@ test("buildChunks respects item and char limits", () => {
   assert.equal(chunks[1].length, 1);
 });
 
+test("buildChunks supports custom char measurement", () => {
+  const items = [
+    { id: 1, source: "One", translation: "하나" },
+    { id: 2, source: "Two", translation: "둘" },
+    { id: 3, source: "Three", translation: "셋" },
+  ];
+
+  const chunks = buildChunks(items, {
+    maxItemsPerChunk: 10,
+    maxCharsPerChunk: 9,
+    measureItem: (item) => item.source.length + item.translation.length,
+  });
+
+  assert.equal(chunks.length, 2);
+  assert.equal(chunks[0].length, 2);
+  assert.equal(chunks[1].length, 1);
+});
+
 test("renderBilingualOutput formats timestamped and freeform lines", () => {
   const items = parseTranscriptText(
     [
@@ -94,9 +115,42 @@ test("renderBilingualOutput formats timestamped and freeform lines", () => {
   );
 });
 
+test("parseBilingualText restores items and Korean lines from rendered output", () => {
+  const items = parseTranscriptText(
+    [
+      CHAPTER_1,
+      "2:03" + "2\uBD84 3\uCD08" + "All right, this is CS50.",
+    ].join("\n"),
+  );
+
+  const translations = new Map([
+    [1, CHAPTER_1_KO],
+    [2, GOOD_CS50],
+  ]);
+
+  const output = renderBilingualOutput(items, translations);
+  const parsed = parseBilingualText(output);
+
+  assert.deepEqual(parsed.items, items);
+  assert.deepEqual(parsed.translationsById, translations);
+});
+
 test("createFingerprint changes when transcript content changes", () => {
   const left = parseTranscriptText("2:03" + "2\uBD84 3\uCD08" + "One");
   const right = parseTranscriptText("2:03" + "2\uBD84 3\uCD08" + "Two");
 
   assert.notEqual(createFingerprint(left), createFingerprint(right));
+});
+
+test("createReviewFingerprint changes when the Korean line changes", () => {
+  const items = parseTranscriptText("2:03" + "2\uBD84 3\uCD08" + "One");
+  const left = new Map([[1, "하나"]]);
+  const right = new Map([[1, "한 개"]]);
+
+  assert.notEqual(createReviewFingerprint(items, left), createReviewFingerprint(items, right));
+});
+
+test("defaultPolishOutputPath adds a Korean polish suffix", () => {
+  const outputPath = defaultPolishOutputPath("C:\\tmp\\lecture0.txt");
+  assert.equal(outputPath, "C:\\tmp\\lecture0_다듬기.txt");
 });

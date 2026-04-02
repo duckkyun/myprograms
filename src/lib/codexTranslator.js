@@ -71,7 +71,7 @@ function normalizeTranslations(items, rawResponse) {
   return normalized;
 }
 
-function buildPrompt(items) {
+function buildTranslationPrompt(items) {
   const payload = items.map((item) => ({
     id: item.id,
     kind: item.kind,
@@ -95,6 +95,31 @@ function buildPrompt(items) {
   ].join("\n");
 }
 
+function buildReviewPrompt(items) {
+  const payload = items.map((item) => ({
+    id: item.id,
+    kind: item.kind,
+    timestamp: item.kind === "timestamp" ? item.timestamp : null,
+    english: item.source,
+    korean: item.translation,
+  }));
+
+  return [
+    "Polish every Korean line into natural Korean while preserving the English source exactly.",
+    "Rules:",
+    "- Review every item exactly once.",
+    "- Do not omit, merge, reorder, summarize, or add information.",
+    "- Keep the current Korean line close to the original meaning unless it is awkward or inaccurate.",
+    "- Fix unnatural Korean phrasing, wrong alignment, and stray untranslated English when they sound out of place.",
+    "- Keep technical terms, names, and course titles accurate. Terms like CS50, ASCII, Unicode, Python, C, HTML, CSS, SQL, OpenAI, and Scratch may stay in English when that sounds natural.",
+    "- Do not include timestamps in the translation text itself.",
+    "- Return JSON only, matching the provided schema.",
+    "",
+    "Items:",
+    JSON.stringify(payload, null, 2),
+  ].join("\n");
+}
+
 export class CodexTranscriptTranslator {
   constructor({
     model,
@@ -109,7 +134,7 @@ export class CodexTranscriptTranslator {
     this.retries = retries;
   }
 
-  async translateChunk(items) {
+  async runChunk(items, promptBuilder) {
     let lastError = null;
 
     for (let attempt = 1; attempt <= this.retries; attempt += 1) {
@@ -125,7 +150,7 @@ export class CodexTranscriptTranslator {
           webSearchEnabled: false,
         });
 
-        const turn = await thread.run(buildPrompt(items), {
+        const turn = await thread.run(promptBuilder(items), {
           outputSchema: OUTPUT_SCHEMA,
         });
 
@@ -136,8 +161,15 @@ export class CodexTranscriptTranslator {
     }
 
     throw new Error(
-      `Chunk translation failed after ${this.retries} attempt(s): ${lastError?.message ?? "unknown error"}`,
+      `Chunk processing failed after ${this.retries} attempt(s): ${lastError?.message ?? "unknown error"}`,
     );
   }
-}
 
+  async translateChunk(items) {
+    return this.runChunk(items, buildTranslationPrompt);
+  }
+
+  async polishChunk(items) {
+    return this.runChunk(items, buildReviewPrompt);
+  }
+}

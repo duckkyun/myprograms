@@ -15,6 +15,8 @@ It is built on top of the official `@openai/codex-sdk`, so the program uses Code
 - Parses YouTube transcript lines such as `2:032분 3초All right, this is CS50`
 - Supports both `m:ss` and `h:mm:ss`
 - Keeps every parsed line and translates it into natural Korean
+- Can run one extra natural-Korean review pass after translation
+- Can reopen an existing bilingual txt and polish only the Korean lines
 - Writes a final `*_번역본.txt` file beside the original input
 - Saves progress after each chunk so long transcripts can resume
 
@@ -46,6 +48,8 @@ Optional flags:
 - `--reasoning low`
 - `--chunk-size 100`
 - `--max-chars 15000`
+- `--review-pass`
+- `--polish-existing`
 - `--overwrite`
 - `--fresh`
 
@@ -54,6 +58,20 @@ Recommended for long lecture transcripts on a ChatGPT/Codex plan:
 ```powershell
 npm run translate -- "C:\Users\USER\Downloads\lecture1.txt" --reasoning low --chunk-size 100 --max-chars 15000
 ```
+
+If you want one extra natural-Korean cleanup pass before saving:
+
+```powershell
+npm run translate -- "C:\Users\USER\Downloads\lecture1.txt" --reasoning low --chunk-size 100 --max-chars 15000 --review-pass
+```
+
+If you already have a bilingual transcript and only want to polish the Korean lines:
+
+```powershell
+npm run translate -- "C:\Users\USER\Downloads\lecture0_번역본.txt" --polish-existing --reasoning low --chunk-size 100 --max-chars 15000
+```
+
+The polish-only mode writes a new `*_다듬기.txt` file by default.
 
 For especially short subtitle-style lines, `--chunk-size` matters more than `--max-chars`. The original `30 / 7000` split can create too many Codex turns and burn through your weekly limit faster than necessary.
 
